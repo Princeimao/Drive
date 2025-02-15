@@ -11,6 +11,7 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.send("hi");
-});
+// routes
+import userRouter from "./src/routes/user.router";
+
+app.use("/api/user", userRouter);
