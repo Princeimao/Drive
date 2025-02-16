@@ -1,13 +1,19 @@
 import { Request, Response } from "express";
+import { ZodError } from "zod";
 import userModel from "../models/user.model";
-import { createUserSchema, userInput } from "../validation/user.validatoin";
+import {
+  createUserSchema,
+  loginUserSchema,
+  userLoginInput,
+  userRegisterInput,
+} from "../validation/user.validatoin";
 
 export const createUser = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const { name, email, password }: userInput = createUserSchema.parse(
+    const { name, email, password }: userRegisterInput = createUserSchema.parse(
       req.body
     );
 
@@ -47,11 +53,74 @@ export const createUser = async (
       data: user,
       token: token,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      res.status(400).json({
+        success: false,
+        message: error.issues,
+      });
+      return;
+    }
+
     console.log("something went wrong while creating user", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
+    return;
+  }
+};
+
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password }: userLoginInput = loginUserSchema.parse(req.body);
+
+    const user = await userModel.findOne({ email });
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "User not found with this email",
+      });
+      return;
+    }
+
+    const result = await user.comparePassword(password);
+
+    if (result === false) {
+      res.status(400).json({
+        success: false,
+        message: "Incorrect Password",
+      });
+      return;
+    }
+
+    const token = user.generateToken();
+
+    if (!token) {
+      throw new Error("Something went wrong while creating token");
+    }
+
+    res.status(200).json({
+      success: false,
+      message: "User created successfully",
+      data: user,
+      token: token,
+    });
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      res.status(400).json({
+        success: false,
+        message: error.issues,
+      });
+      return;
+    }
+
+    console.log("something went wrong while creating user", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+    return;
   }
 };

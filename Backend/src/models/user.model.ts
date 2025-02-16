@@ -63,7 +63,7 @@ userSchema.methods.generateToken = function (): string {
         name: this.name,
       },
       privateKey,
-      { algorithm: "RS256", expiresIn: "1h" }
+      { expiresIn: "1h" }
     );
 
     return token;

@@ -6,5 +6,5 @@ export interface Iuser extends Document {
   password: string;
   file: mongoose.Schema.Types.ObjectId;
   generateToken(): string;
-  comparePassword(): Promise<boolean>;
+  comparePassword(password: string): Promise<boolean>;
 }
