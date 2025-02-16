@@ -1,10 +1,11 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 import { JWT_SECRET } from "../config/env";
+import { Iuser } from "../interfaces/db.interface";
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema<Iuser>({
   name: {
     type: String,
     required: true,
@@ -37,31 +38,39 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.comparePassword = async function (password: string) {
+userSchema.methods.comparePassword = async function (
+  password: string
+): Promise<boolean> {
   try {
     const result = await bcrypt.compare(password, this.password);
     return result;
   } catch (error) {
     console.log("something went wrong while comparing password", error);
+    return false;
   }
 };
 
-userSchema.methods.generateToken = async function () {
+userSchema.methods.generateToken = function (): string {
   if (!JWT_SECRET) {
     throw new Error("JWT_SECRET is not a string");
   }
+  const privateKey = JWT_SECRET;
   try {
-    const token = await jwt.sign(
+    const token = jwt.sign(
       {
         _id: this._id,
         email: this.email,
         name: this.name,
       },
-      JWT_SECRET
+      privateKey,
+      { algorithm: "RS256", expiresIn: "1h" }
     );
+
+    return token;
   } catch (error) {
     console.log("something went wrong while generating token", error);
+    return "";
   }
 };
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model<Iuser>("User", userSchema);

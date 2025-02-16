@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import userModel from "../models/user.model";
 import { createUserSchema, userInput } from "../validation/user.validatoin";
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { name, email, password }: userInput = createUserSchema.parse(
       req.body
@@ -11,10 +14,11 @@ export const createUser = async (req: Request, res: Response) => {
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "User already exists",
       });
+      return;
     }
 
     const user = await userModel.create({
@@ -24,16 +28,24 @@ export const createUser = async (req: Request, res: Response) => {
     });
 
     if (!user) {
-      return res.status(501).json({
+      res.status(501).json({
         success: false,
         message: "Internal sever error, creating user",
       });
+      return;
+    }
+
+    const token = user.generateToken();
+
+    if (!token) {
+      throw new Error("Something went wrong while creating token");
     }
 
     res.status(200).json({
       success: false,
       message: "User created successfully",
       data: user,
+      token: token,
     });
   } catch (error) {
     console.log("something went wrong while creating user", error);
