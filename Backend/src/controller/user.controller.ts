@@ -103,7 +103,7 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
 
     res.status(200).json({
       success: false,
-      message: "User created successfully",
+      message: "user login successfully",
       data: user,
       token: token,
     });
@@ -116,11 +116,19 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    console.log("something went wrong while creating user", error);
+    console.log("something went wrong while creating user session", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",
     });
     return;
+  }
+};
+
+export const getUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+  } catch (error) {
+    console.log("something went wrong while getting the user", error);
   }
 };
