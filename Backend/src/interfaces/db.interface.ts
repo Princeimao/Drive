@@ -10,3 +10,11 @@ export interface Iuser extends Document {
   comparePassword(password: string): Promise<boolean>;
   __v: number;
 }
+
+export interface IFile extends Document {
+  owner: mongoose.Schema.Types.ObjectId;
+  filename: string;
+  filepath: string;
+  mimetype: string;
+  size: number;
+}
