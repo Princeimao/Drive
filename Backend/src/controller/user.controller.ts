@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { ZodError } from "zod";
+import { IRequest } from "../interfaces/express.interface";
 import userModel from "../models/user.model";
 import {
   createUserSchema,
@@ -125,9 +126,46 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+// export const getUser = async (req: Request, res: Response): Promise<void> => {
+//   try {
+//     const { email } = (req as IRequest).user;
+
+//     const user = await userModel.findOne({ email }).populate("File");
+
+//     if (!user) {
+//       res.status(400).json({
+//         success: false,
+//         message: "user not found or Unauthorized user",
+//       });
+//     }
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Files found successfully",
+//       file: user?.file,
+//     });
+//   } catch (error) {
+//     console.log("something went wrong while getting the user", error);
+//   }
+// };
+
 export const getUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { email } = (req as IRequest).user;
+
+    const user = await userModel.findOne({ email }).select("-password");
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "user not found or Unauthorized user",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: "Files found successfully",
+      user,
+    });
   } catch (error) {
     console.log("something went wrong while getting the user", error);
   }

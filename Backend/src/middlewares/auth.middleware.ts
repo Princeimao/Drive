@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/env";
-import { AuthRequest } from "../interfaces/express.interface";
+import { IRequest } from "../interfaces/express.interface";
+import { IUserPayload } from "../interfaces/jwt.interface";
 
 export const authMiddleware = async (
   req: Request,
@@ -33,9 +34,9 @@ export const authMiddleware = async (
       throw new Error("JWT_SECRET is not a string");
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as IUserPayload;
 
-    (req as AuthRequest).user = decoded;
+    (req as IRequest).user = decoded;
 
     next();
   } catch (error) {

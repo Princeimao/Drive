@@ -1,11 +1,11 @@
 import { Request } from "express";
-import { JwtPayload } from "jsonwebtoken";
+import { IUserPayload } from "./jwt.interface";
 
-export interface AuthRequest extends Request {
+export interface IRequest extends Request {
   headers: {
     authorization?: string;
   };
-  user: string | JwtPayload;
+  user: IUserPayload;
 }
 
 // export interface IResponse extends Response {
