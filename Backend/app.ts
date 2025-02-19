@@ -12,6 +12,8 @@ app.use(
 );
 
 // routes
+import uploadRouter from "./src/routes/upload.route";
 import userRouter from "./src/routes/user.router";
 
 app.use("/api/user", userRouter);
+app.use("/api/user/upload", uploadRouter);
